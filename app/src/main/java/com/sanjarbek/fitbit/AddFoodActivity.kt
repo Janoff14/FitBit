@@ -18,8 +18,8 @@ class AddFoodActivity : AppCompatActivity() {
         val btn_register = findViewById<Button>(R.id.btn_register)
 
         val db = Room.databaseBuilder(
-        applicationContext,
-        AppDatabase::class.java, "FoodDb"
+            applicationContext,
+            AppDatabase::class.java, "FoodDb"
         ).build()
 
         val foodDao = db.foodDao()

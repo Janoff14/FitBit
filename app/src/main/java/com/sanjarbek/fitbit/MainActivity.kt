@@ -3,10 +3,16 @@ package com.sanjarbek.fitbit
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,29 +22,31 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val recycler = findViewById<RecyclerView>(R.id.rcv_food)
-        var foodArrayList: java.util.ArrayList<Food> = ArrayList()
-
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "FoodDb"
-        ).build()
-
-        val foodDao = db.foodDao()
-
-        CoroutineScope(Dispatchers.IO).launch {
-
-            foodArrayList = foodDao.getAll() as ArrayList<Food> /* = java.util.ArrayList<com.sanjarbek.fitbit.Food> */
-            val adaper = FoodAdapter(applicationContext, foodArrayList)
-            recycler.adapter = adaper
+        if (savedInstanceState == null) {
+            loadFragment(DashboardFragment())
         }
 
+        val bottomNavigationMenu = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
-
-        val button = findViewById<Button>(R.id.btn_addFood)
-        button.setOnClickListener {
-            val intent = Intent(this, AddFoodActivity::class.java)
-            startActivity(intent)
+        bottomNavigationMenu.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.action_log -> {loadFragment(DashboardFragment())
+                    Log.d("TAG", "onCreate: dash")
+                    return@setOnItemSelectedListener true }
+                R.id.action_dashboard -> {loadFragment(LogFragment())
+                    Log.d("TAG", "onCreate: load")
+                    return@setOnItemSelectedListener true}
+                else -> true
+            }
         }
+
+    }
+
+    private  fun loadFragment(fragment: Fragment){
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container_view,fragment)
+        transaction.addToBackStack(null)
+        transaction.setReorderingAllowed(true)
+        transaction.commit()
     }
 }
